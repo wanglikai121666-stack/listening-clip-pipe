@@ -16,6 +16,7 @@ Listening Clip Pipe collapses all of that into two keypresses:
 
 - **🎧 Records what you hear, not what your mic hears.** It taps macOS system audio output directly (Core Audio Process Tap) — clean audio with zero room noise, works with headphones.
 - **⚡ One hotkey, zero context switch.** ⌥Z to start, ⌥Z to stop. You never leave your player or your notes.
+- **🔴 Impossible to miss that you're recording.** While recording, a floating always-on-top ● REC timer sits at the top-right of your screen — visible over full-screen apps, click-through so it never gets in your way.
 - **📋 Paste-ready instantly.** The clip lands on your clipboard as a file; Cmd+V drops it into your document at the exact spot where you're writing your error analysis.
 - **🤖 AI/script-friendly by design.** Every clip gets a unique ID, a structured text anchor, a per-clip metadata JSON, and a global index — so later you (or an LLM agent) can batch-process your mishearing collection: transcribe, tag connected-speech patterns, build review schedules.
 - **🔒 100% local, minimal permissions.** No cloud, no account, no telemetry. Needs only the "System Audio Recording Only" permission — no microphone, no screen recording, no accessibility access.
@@ -40,7 +41,7 @@ A waveform icon appears in your menu bar. The first time you press ⌥Z, macOS a
 ## Usage
 
 1. Play your IELTS audio / podcast / lecture.
-2. Hear something you can't parse → press **⌥Z** (menu bar icon turns red).
+2. Hear something you can't parse → press **⌥Z** (menu bar icon turns red and a floating ● REC timer appears at the top-right of the screen).
 3. Let the passage finish → press **⌥Z** again.
 4. Notification: *Clip copied*. Switch to your notes and **Cmd+V**.
 5. Write down what you misheard and why, right next to the audio.

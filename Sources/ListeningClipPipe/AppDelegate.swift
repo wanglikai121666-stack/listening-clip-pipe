@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let recorder = RecorderService()
     private let clipboard = ClipboardService()
     private let hotkey = HotkeyManager()
+    private let indicator = RecordingIndicator()
     private var store: ClipStore!
 
     private var currentClipID: String?
@@ -52,6 +53,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if recorder.isRecording {
             _ = try? recorder.stop()
         }
+        indicator.hide()
         hotkey.unregister()
     }
 
@@ -72,6 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try recorder.start(writingTo: store.audioURL(for: id))
             currentClipID = id
             recordingStartedAt = startedAt
+            indicator.show()
             NSSound(named: "Pop")?.play()
         } catch {
             showError("开始录制失败", error)
@@ -83,6 +86,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let id = currentClipID, let startedAt = recordingStartedAt else { return }
         currentClipID = nil
         recordingStartedAt = nil
+        indicator.hide()
         do {
             let duration = try recorder.stop()
             let meta = store.makeMetadata(id: id, startedAt: startedAt, duration: duration)
