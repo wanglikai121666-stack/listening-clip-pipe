@@ -8,9 +8,9 @@ final class RecordingIndicator {
     private var timer: Timer?
     private var startedAt: Date?
 
-    func show() {
+    func show(startedAt: Date = Date()) {
         hide()
-        startedAt = Date()
+        self.startedAt = startedAt
 
         let size = NSSize(width: 136, height: 36)
         let panel = NSPanel(
