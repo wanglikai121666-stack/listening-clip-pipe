@@ -78,11 +78,14 @@ note:
 
 ## Paste compatibility note
 
-The clipboard is written in *composite* mode: one pasteboard item carrying both the file URL and the text anchor. Most editors take the file. If your target app pastes only one of the two, use the separate **Copy Last Clip** / **Copy Last Anchor** menu items as a fallback.
+- **Session with marks** → the clipboard holds multiple files (Finder-style multi-file copy): the full recording plus every sliced segment. One Cmd+V pastes them all.
+- **Session without marks** → *composite* mode: one pasteboard item carrying both the file URL and the text anchor; most editors take the file.
 
-## v1.0 scope & roadmap
+If your target app doesn't paste what you expect, use the **Copy Last Clip** / **Copy Last Anchor** / **Copy Last Clip + Anchor** menu items as fallbacks.
 
-v1.0 does capture, storage, and clipboard — nothing else, on purpose. Not included (yet): automatic transcription, Feishu API sync (interface stubbed in `FeishuSyncService.swift`), source-text matching, replay/review UI, spaced-repetition scheduling, Anki export. The structured local data means all of these can be built on top without touching the capture pipeline.
+## Scope & roadmap
+
+The current version (v1.3.x) does capture, marking, slicing, local storage, and clipboard — nothing else, on purpose. Not included (yet): automatic transcription/ASR analysis of the marked segments, Feishu API sync (interface stubbed in `FeishuSyncService.swift`), source-text matching, replay/review UI, spaced-repetition scheduling, Anki export. The structured local data (mark time ranges in per-session metadata + global index) means all of these can be built on top without touching the capture pipeline.
 
 ## Troubleshooting
 
