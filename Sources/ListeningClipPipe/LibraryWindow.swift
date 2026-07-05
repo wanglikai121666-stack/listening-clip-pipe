@@ -90,13 +90,22 @@ struct LibraryView: View {
     @State private var deleteTarget: ClipMetadata?
 
     var body: some View {
-        VStack(spacing: 0) {
-            settingsBar
-            Divider()
-            if model.sessions.isEmpty {
-                emptyState
-            } else {
-                sessionList
+        NavigationStack {
+            VStack(spacing: 0) {
+                settingsBar
+                Divider()
+                if model.sessions.isEmpty {
+                    emptyState
+                } else {
+                    sessionList
+                }
+            }
+            .navigationDestination(for: String.self) { id in
+                if let meta = model.sessions.first(where: { $0.id == id }) {
+                    SessionDetailView(meta: meta, store: model.store)
+                } else {
+                    Text("录音不存在").foregroundStyle(.secondary)
+                }
             }
         }
         .frame(minWidth: 820, minHeight: 480)
@@ -179,7 +188,6 @@ struct LibraryView: View {
                 meta: meta,
                 busy: model.busyIDs.contains(meta.id),
                 hasReport: model.hasReport(meta),
-                onPlay: { model.play(meta) },
                 onTranscribe: { model.transcribe(meta) },
                 onOpenReport: { model.openReport(meta) },
                 onReveal: { model.revealInFinder(meta) },
@@ -195,7 +203,6 @@ private struct SessionRow: View {
     let meta: ClipMetadata
     let busy: Bool
     let hasReport: Bool
-    let onPlay: () -> Void
     let onTranscribe: () -> Void
     let onOpenReport: () -> Void
     let onReveal: () -> Void
@@ -208,21 +215,31 @@ private struct SessionRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(meta.id).font(.system(.body, design: .monospaced)).bold()
-                HStack(spacing: 8) {
-                    Text(durationText)
-                    Text("\(meta.segments?.count ?? 0) 个打标")
-                        .foregroundStyle((meta.segments?.isEmpty ?? true) ? .secondary : Color.green)
-                    if hasReport {
-                        Label("已转录", systemImage: "doc.text")
-                            .foregroundStyle(.blue)
+            NavigationLink(value: meta.id) {
+                HStack(spacing: 10) {
+                    Image(systemName: "play.circle")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(meta.id).font(.system(.body, design: .monospaced)).bold()
+                        HStack(spacing: 8) {
+                            Text(durationText)
+                            Text("\(meta.segments?.count ?? 0) 个打标")
+                                .foregroundStyle((meta.segments?.isEmpty ?? true) ? .secondary : Color.green)
+                            if hasReport {
+                                Label("已转录", systemImage: "doc.text")
+                                    .foregroundStyle(.blue)
+                            }
+                            Text(meta.feishu_doc_url.isEmpty ? "未上传飞书" : "已上传飞书")
+                                .foregroundStyle(meta.feishu_doc_url.isEmpty ? .secondary : Color.green)
+                        }
+                        .font(.caption)
                     }
-                    Text(meta.feishu_doc_url.isEmpty ? "未上传飞书" : "已上传飞书")
-                        .foregroundStyle(meta.feishu_doc_url.isEmpty ? .secondary : Color.green)
                 }
-                .font(.caption)
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .help("打开播放与绿标编辑页")
 
             Spacer()
 
@@ -230,7 +247,6 @@ private struct SessionRow: View {
                 ProgressView().controlSize(.small)
                 Text("转录中…").font(.caption).foregroundStyle(.secondary)
             } else {
-                Button("播放", action: onPlay)
                 Button(hasReport ? "重新转录" : "转录", action: onTranscribe)
                 Button("查看转录", action: onOpenReport)
                     .disabled(!hasReport)

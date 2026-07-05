@@ -48,9 +48,10 @@ swiftc -O -swift-version 5 \
 
 APP="build/ListeningClipPipe.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp build/ListeningClipPipe "$APP/Contents/MacOS/ListeningClipPipe"
 cp Info.plist "$APP/Contents/Info.plist"
+cp Assets/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 # 本机自用 ad-hoc 签名。注意：每次重新构建签名会变化，
 # macOS 可能重新弹一次「系统音频录制」授权，属正常现象。

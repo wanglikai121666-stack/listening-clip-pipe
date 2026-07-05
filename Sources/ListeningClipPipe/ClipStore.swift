@@ -62,6 +62,32 @@ final class ClipStore {
         fm.fileExists(atPath: reportURL(for: id).path)
     }
 
+    /// 绿标编辑后重新切分：删除旧切分段文件，按新区间重切，更新元数据与索引。
+    func reslice(meta: ClipMetadata, ranges: [(start: Double, end: Double)]) throws -> ClipMetadata {
+        for seg in meta.segments ?? [] {
+            let url = clipsDir.appendingPathComponent(seg.file)
+            if fm.fileExists(atPath: url.path) {
+                try fm.removeItem(at: url)
+            }
+        }
+        let fullURL = fileURL(for: meta)
+        var segments: [ClipSegment] = []
+        for (i, range) in ranges.sorted(by: { $0.start < $1.start }).enumerated() {
+            let segURL = segmentURL(for: meta.id, index: i + 1)
+            try AudioSlicer.slice(source: fullURL, to: segURL, start: range.start, end: range.end)
+            segments.append(ClipSegment(
+                file: segURL.lastPathComponent,
+                start_sec: (range.start * 10).rounded() / 10,
+                end_sec: (range.end * 10).rounded() / 10,
+                duration_sec: ((range.end - range.start) * 10).rounded() / 10
+            ))
+        }
+        var newMeta = meta
+        newMeta.segments = segments.isEmpty ? nil : segments
+        try save(newMeta)
+        return newMeta
+    }
+
     /// 删除一次会话的全部落盘内容：总录音、切分段、metadata、报告、索引条目。
     func remove(_ meta: ClipMetadata) throws {
         var paths = [fileURL(for: meta), metadataURL(for: meta.id), reportURL(for: meta.id)]

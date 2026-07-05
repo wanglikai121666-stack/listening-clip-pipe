@@ -1,3 +1,5 @@
+<img src="Assets/icon_1024.png" width="120" alt="Listening Clip Pipe icon">
+
 # Listening Clip Pipe
 
 **English** | [中文](README.zh-CN.md)
@@ -19,6 +21,7 @@ Listening Clip Pipe collapses all of that into two keypresses:
 - **⏪ Pre-roll for the "wait, what?" moment.** You never realize you're lost until you're already half-way through the phrase. The **Mark Pre-roll** menu option (0.1–1s) backdates each mark's start, so the cut segment includes the part you heard before you reacted.
 - **🔴 A live timeline you can't miss.** While recording, a floating always-on-top timeline sits at the top-right of your screen — pulsing REC timer, mark count, and every green segment drawn in place across the whole session. Visible over full-screen apps, click-through. Optional: toggle via **Show On-Screen Timeline** in the menu.
 - **📋 Paste-ready instantly.** The clip lands on your clipboard as a file; Cmd+V drops it into your document at the exact spot where you're writing your error analysis.
+- **▶️ Built-in player with a visual mark editor.** Click any session in the Library to open its detail page: play/pause (Space), a draggable seek bar with every green mark drawn on it, and full mark editing — create a mark at the playhead (0.5s default), drag the round handles to adjust its start/end, delete it, then save to re-slice the segment files.
 - **📝 One-click ASR analysis report.** The Library window (double-click the app icon, or menu → Library) lists every past session with play / delete / transcribe buttons. Transcribe calls SiliconFlow ASR (SenseVoiceSmall) on the full recording *and* each marked segment, then writes a Markdown report to `reports/`: the full transcript with the parts you didn't catch **bolded in place** (fuzzy-matched) with the segment audio linked right next to them — ready to pipe into Feishu later. Global pre-roll and your API key (stored locally only, never in this repo) are configurable in the same window.
 - **🤖 AI/script-friendly by design.** Every clip gets a unique ID, a structured text anchor, a per-clip metadata JSON, and a global index — so later you (or an LLM agent) can batch-process your mishearing collection: transcribe, tag connected-speech patterns, build review schedules.
 - **🔒 100% local, minimal permissions.** No cloud, no account, no telemetry. Needs only the "System Audio Recording Only" permission — no microphone, no screen recording, no accessibility access.
