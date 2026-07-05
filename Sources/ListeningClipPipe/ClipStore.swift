@@ -39,6 +39,8 @@ struct ClipsIndex: Codable {
 final class ClipStore {
     let rootDir: URL
     let clipsDir: URL
+    /// ASR 分析报告目录：reports/LC_xxx_听力分析.md
+    let reportsDir: URL
     var indexURL: URL { rootDir.appendingPathComponent("clips_index.json") }
 
     private let fm = FileManager.default
@@ -47,7 +49,31 @@ final class ClipStore {
         rootDir = fm.homeDirectoryForCurrentUser
             .appendingPathComponent("Documents/ListeningClipPipe", isDirectory: true)
         clipsDir = rootDir.appendingPathComponent("clips", isDirectory: true)
+        reportsDir = rootDir.appendingPathComponent("reports", isDirectory: true)
         try fm.createDirectory(at: clipsDir, withIntermediateDirectories: true)
+        try fm.createDirectory(at: reportsDir, withIntermediateDirectories: true)
+    }
+
+    func reportURL(for id: String) -> URL {
+        reportsDir.appendingPathComponent("\(id)_听力分析.md")
+    }
+
+    func hasReport(for id: String) -> Bool {
+        fm.fileExists(atPath: reportURL(for: id).path)
+    }
+
+    /// 删除一次会话的全部落盘内容：总录音、切分段、metadata、报告、索引条目。
+    func remove(_ meta: ClipMetadata) throws {
+        var paths = [fileURL(for: meta), metadataURL(for: meta.id), reportURL(for: meta.id)]
+        paths += (meta.segments ?? []).map { clipsDir.appendingPathComponent($0.file) }
+        for url in paths where fm.fileExists(atPath: url.path) {
+            try fm.removeItem(at: url)
+        }
+        var index = loadIndex()
+        index.clips.removeAll { $0.id == meta.id }
+        let enc = JSONEncoder()
+        enc.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        try enc.encode(index).write(to: indexURL)
     }
 
     /// LC_YYYYMMDD_HHMMSS，同一秒内重复时追加序号保证唯一。

@@ -1,5 +1,6 @@
 import AppKit
 import Carbon.HIToolbox
+import SwiftUI
 import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -9,6 +10,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let hotkey = HotkeyManager()
     private let indicator = RecordingIndicator()
     private var store: ClipStore!
+    private var libraryWindowController: NSWindowController?
+    private var libraryModel: LibraryModel?
 
     /// 会话模型：⌥Z 开始/结束一次总录音；录音期间空格被系统级独占，
     /// 负责打标——第一下开一个绿段，第二下闭合，可打任意多段。
@@ -76,6 +79,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         refreshUI()
+    }
+
+    /// 双击 App 图标（Dock/启动台/Finder）时打开录音库窗口。
+    func applicationShouldHandleReopen(
+        _ sender: NSApplication,
+        hasVisibleWindows flag: Bool
+    ) -> Bool {
+        openLibrary()
+        return true
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -177,6 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             )
             try store.save(meta)
             lastMeta = meta
+            NotificationCenter.default.post(name: .lcpClipsChanged, object: nil)
 
             if segments.isEmpty {
                 // 没打标：和原来一样，粘贴出来就是完整一条。
@@ -271,6 +284,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSWorkspace.shared.open(store.clipsDir)
     }
 
+    /// 录音库窗口：历史录音列表、播放/删除/ASR 转录/查看报告、提前量与 API Key 设置。
+    /// AppDelegate 的回调都在主线程，assumeIsolated 只是向编译器声明这一事实。
+    @objc func openLibrary() {
+        MainActor.assumeIsolated {
+            if libraryWindowController == nil {
+                let model = LibraryModel(store: store)
+                let hosting = NSHostingController(rootView: LibraryView(model: model))
+                let window = NSWindow(contentViewController: hosting)
+                window.title = "Listening Clip Pipe · 录音库"
+                window.setContentSize(NSSize(width: 860, height: 520))
+                window.isReleasedWhenClosed = false
+                window.center()
+                libraryModel = model
+                libraryWindowController = NSWindowController(window: window)
+            }
+            libraryModel?.reload()
+            NSApp.activate(ignoringOtherApps: true)
+            libraryWindowController?.showWindow(nil)
+            libraryWindowController?.window?.makeKeyAndOrderFront(nil)
+        }
+    }
+
     // MARK: - UI
 
     private func setupStatusItem() {
@@ -296,6 +331,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         prerollMenuItem.submenu = prerollMenu
 
+        let libraryItem = menuItem("Library（录音库）…", #selector(openLibrary), key: "l", modifiers: [.option])
         indicatorMenuItem = menuItem("Show On-Screen Timeline", #selector(toggleIndicatorSetting))
         copyBothMenuItem = menuItem("Copy Last Clip + Anchor", #selector(copyLastComposite))
         copyClipMenuItem = menuItem("Copy Last Clip", #selector(copyLastClip))
@@ -313,6 +349,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             copyClipMenuItem,
             copyAnchorMenuItem,
             .separator(),
+            libraryItem,
             prerollMenuItem,
             indicatorMenuItem,
             openItem,

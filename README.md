@@ -19,6 +19,7 @@ Listening Clip Pipe collapses all of that into two keypresses:
 - **⏪ Pre-roll for the "wait, what?" moment.** You never realize you're lost until you're already half-way through the phrase. The **Mark Pre-roll** menu option (0.1–1s) backdates each mark's start, so the cut segment includes the part you heard before you reacted.
 - **🔴 A live timeline you can't miss.** While recording, a floating always-on-top timeline sits at the top-right of your screen — pulsing REC timer, mark count, and every green segment drawn in place across the whole session. Visible over full-screen apps, click-through. Optional: toggle via **Show On-Screen Timeline** in the menu.
 - **📋 Paste-ready instantly.** The clip lands on your clipboard as a file; Cmd+V drops it into your document at the exact spot where you're writing your error analysis.
+- **📝 One-click ASR analysis report.** The Library window (double-click the app icon, or menu → Library) lists every past session with play / delete / transcribe buttons. Transcribe calls SiliconFlow ASR (SenseVoiceSmall) on the full recording *and* each marked segment, then writes a Markdown report to `reports/`: the full transcript with the parts you didn't catch **bolded in place** (fuzzy-matched) with the segment audio linked right next to them — ready to pipe into Feishu later. Global pre-roll and your API key (stored locally only, never in this repo) are configurable in the same window.
 - **🤖 AI/script-friendly by design.** Every clip gets a unique ID, a structured text anchor, a per-clip metadata JSON, and a global index — so later you (or an LLM agent) can batch-process your mishearing collection: transcribe, tag connected-speech patterns, build review schedules.
 - **🔒 100% local, minimal permissions.** No cloud, no account, no telemetry. Needs only the "System Audio Recording Only" permission — no microphone, no screen recording, no accessibility access.
 
@@ -55,6 +56,8 @@ Everything lives under `~/Documents/ListeningClipPipe/`:
 
 ```
 ~/Documents/ListeningClipPipe/
+├── reports/
+│   └── LC_20260626_213522_听力分析.md   # ASR analysis report (full transcript + marked parts)
 ├── clips/
 │   ├── LC_20260626_213522_总录音.wav     # full session recording (plain LC_xxx.wav when unmarked)
 │   ├── LC_20260626_213522_第1段切分.wav  # marked segment #1
@@ -85,7 +88,7 @@ If your target app doesn't paste what you expect, use the **Copy Last Clip** / *
 
 ## Scope & roadmap
 
-The current version (v1.3.x) does capture, marking, slicing, local storage, and clipboard — nothing else, on purpose. Not included (yet): automatic transcription/ASR analysis of the marked segments, Feishu API sync (interface stubbed in `FeishuSyncService.swift`), source-text matching, replay/review UI, spaced-repetition scheduling, Anki export. The structured local data (mark time ranges in per-session metadata + global index) means all of these can be built on top without touching the capture pipeline.
+The current version (v1.4.x) does capture, marking, slicing, local storage, clipboard, and on-demand ASR analysis reports (SiliconFlow SenseVoiceSmall — bring your own API key, set it in the Library window). Not included (yet): Feishu API sync (interface stubbed in `FeishuSyncService.swift`; reports are designed to be uploaded by an external CLI), replay/review UI, spaced-repetition scheduling, Anki export. The structured local data (mark time ranges in per-session metadata + global index) means all of these can be built on top without touching the capture pipeline.
 
 ## Troubleshooting
 
