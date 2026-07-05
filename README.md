@@ -4,7 +4,7 @@
 
 > Capture the exact seconds you couldn't hear — one hotkey, straight into your study notes.
 
-Listening Clip Pipe is a macOS menu bar tool built for **IELTS listening practice** (and any serious audio-based language learning). Press **⌥Z** to enter **Capture Mode** — the space bar becomes your system-wide record button. Hit a stretch of connected speech you can't parse? Tap **Space** to start recording the system audio, tap **Space** again to stop — the clip is saved locally and copied to your clipboard, ready to paste (Cmd+V) into Feishu, Notion, or any document, right where you're taking notes. Record as many clips as you want, then press **⌥Z** to exit Capture Mode and give the space bar back to the rest of your Mac.
+Listening Clip Pipe is a macOS menu bar tool built for **IELTS listening practice** (and any serious audio-based language learning). Press **⌥Z** to start recording the whole listening session (system audio, no mic) — a floating timeline appears at the top-right of your screen. Whenever you hit a stretch of connected speech you can't parse, tap **Space** to open a **green mark** on the timeline, tap **Space** again to close it. Mark as many trouble spots as you want. Press **⌥Z** to stop: every green mark is cut into its own audio file, and the full recording **plus all marked segments** land on your clipboard — one Cmd+V pastes them all into Feishu, Notion, or any document. No marks? Then you get exactly one complete clip, same as a simple recorder.
 
 Started as **v1.0** with the complete "capture → save → paste" pipeline — deliberately minimal.
 
@@ -15,8 +15,9 @@ Traditional workflow when you mishear 3 seconds of an IELTS recording: find the 
 Listening Clip Pipe collapses all of that into two keypresses:
 
 - **🎧 Records what you hear, not what your mic hears.** It taps macOS system audio output directly (Core Audio Process Tap) — clean audio with zero room noise, works with headphones.
-- **⚡ Space bar as the record button, zero context switch.** ⌥Z arms Capture Mode; while it's on, a single tap of Space starts/stops a clip — the fastest possible reaction to a mishearing, and you never leave your player or your notes. Space is exclusively claimed only while the mode is on (via the same permission-free Carbon hotkey API), and is fully restored the moment you press ⌥Z again.
-- **🔴 Impossible to miss that you're recording.** While recording, a floating always-on-top ● REC timer sits at the top-right of your screen — visible over full-screen apps, click-through so it never gets in your way. Optional: toggle it via **Show On-Screen REC Indicator** in the menu.
+- **⚡ Space bar as the mark button, zero context switch.** While a session is recording, a single tap of Space opens/closes a green mark — the fastest possible reaction to a mishearing, and you never leave your player. Space is exclusively claimed only while recording (via a permission-free Carbon hotkey), and is restored the instant you stop.
+- **⏪ Pre-roll for the "wait, what?" moment.** You never realize you're lost until you're already half-way through the phrase. The **Mark Pre-roll** menu option (0.1–1s) backdates each mark's start, so the cut segment includes the part you heard before you reacted.
+- **🔴 A live timeline you can't miss.** While recording, a floating always-on-top timeline sits at the top-right of your screen — pulsing REC timer, mark count, and every green segment drawn in place across the whole session. Visible over full-screen apps, click-through. Optional: toggle via **Show On-Screen Timeline** in the menu.
 - **📋 Paste-ready instantly.** The clip lands on your clipboard as a file; Cmd+V drops it into your document at the exact spot where you're writing your error analysis.
 - **🤖 AI/script-friendly by design.** Every clip gets a unique ID, a structured text anchor, a per-clip metadata JSON, and a global index — so later you (or an LLM agent) can batch-process your mishearing collection: transcribe, tag connected-speech patterns, build review schedules.
 - **🔒 100% local, minimal permissions.** No cloud, no account, no telemetry. Needs only the "System Audio Recording Only" permission — no microphone, no screen recording, no accessibility access.
@@ -40,13 +41,13 @@ A waveform icon appears in your menu bar. The first time you press ⌥Z, macOS a
 
 ## Usage
 
-1. Play your IELTS audio / podcast / lecture, and press **⌥Z** to enter Capture Mode (menu bar icon turns orange; Space is now the record button and won't reach other apps).
-2. Hear something you can't parse → tap **Space** (icon turns red, a floating ● REC timer appears at the top-right of the screen).
-3. Let the passage finish → tap **Space** again. Notification: *Clip copied*.
-4. Switch to your notes and **Cmd+V**; write down what you misheard and why, right next to the audio. Repeat 2–4 for as many clips as you like.
-5. Done with the listening session → press **⌥Z** to exit Capture Mode (Space goes back to normal).
+1. Press **⌥Z** and start your IELTS audio / podcast / lecture — the whole session records, and the floating timeline appears (Space is now the mark button and won't reach other apps).
+2. Hear something you can't parse → tap **Space**: a green segment opens on the timeline (backdated by the pre-roll setting).
+3. The trouble spot passes → tap **Space** again to close the green segment. Repeat 2–3 for every spot you miss; the timeline shows all of them.
+4. Session over → press **⌥Z**. Each green mark is cut into its own WAV; the clipboard gets the **full recording + all marked segments** (an unclosed final mark is ended at the stop point). No marks → clipboard gets the single full clip, like before.
+5. Switch to your notes and **Cmd+V** — everything pastes at once. Write down what you misheard next to each segment.
 
-The menu bar menu also offers **Start/Stop Recording** (mouse-only alternative), **Copy Last Clip + Anchor**, **Copy Last Clip**, **Copy Last Anchor** (in case a paste didn't take), **Show On-Screen REC Indicator** (toggle the floating REC timer), and **Open Clips Folder**.
+The menu bar menu also offers **Start/Stop Recording** and **Mark (Space)** (mouse alternatives), **Copy Last Clip + Anchor**, **Copy Last Clip**, **Copy Last Anchor** (in case a paste didn't take), **Mark Pre-roll** (0.1–1s backdating), **Show On-Screen Timeline**, and **Open Clips Folder**.
 
 ## Data layout
 
@@ -55,18 +56,23 @@ Everything lives under `~/Documents/ListeningClipPipe/`:
 ```
 ~/Documents/ListeningClipPipe/
 ├── clips/
-│   ├── LC_20260626_213522.wav    # the audio clip (16-bit PCM WAV)
-│   └── LC_20260626_213522.json   # per-clip metadata
-└── clips_index.json              # global index for batch processing
+│   ├── LC_20260626_213522.wav      # full session recording (16-bit PCM WAV)
+│   ├── LC_20260626_213522_M1.wav   # marked segment #1
+│   ├── LC_20260626_213522_M2.wav   # marked segment #2
+│   └── LC_20260626_213522.json     # per-session metadata (incl. mark time ranges)
+└── clips_index.json                # global index for batch processing (e.g. future ASR)
 ```
 
-Each clip's text anchor (for locating the clip semantically inside your documents):
+Each session's text anchor (for locating the audio semantically inside your documents):
 
 ```
 🎧 AUDIO_CLIP_ID: LC_20260626_213522
-duration: 8.4s
+duration: 754.2s
 local_file: LC_20260626_213522.wav
 source: system_audio
+marks: 2
+  - LC_20260626_213522_M1.wav (12.3s–20.1s)
+  - LC_20260626_213522_M2.wav (95.0s–101.4s)
 note:
 ```
 
@@ -83,7 +89,7 @@ v1.0 does capture, storage, and clipboard — nothing else, on purpose. Not incl
 - **`swift build` fails / `import Foundation` errors about `SwiftBridging` redefinition**: some mixed-version Command Line Tools installs ship a stale `module.modulemap`. `build_app.sh` compiles with `swiftc` directly and auto-applies a VFS-overlay workaround; the permanent fix is `sudo mv /Library/Developer/CommandLineTools/usr/include/swift/module.modulemap{,.bak}`.
 - **Permission prompt reappears after rebuilding**: the build is ad-hoc signed, so each rebuild has a new signature. Keep a copy in `/Applications` for daily use.
 - **⌥Z does nothing**: check the menu bar icon exists (app running), and that no other app claims the ⌥Z global hotkey.
-- **Space bar stopped typing spaces**: you're in Capture Mode (menu bar icon is orange/red) — press ⌥Z to exit and Space is restored instantly.
+- **Space bar stopped typing spaces**: a recording session is running (menu bar icon is red) — press ⌥Z to stop and Space is restored instantly.
 
 ## License
 

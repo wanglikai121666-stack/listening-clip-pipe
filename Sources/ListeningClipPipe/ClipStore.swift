@@ -1,6 +1,15 @@
 import Foundation
 
+/// 会话内一个打标绿段（时间相对总录音起点，秒）。
+struct ClipSegment: Codable {
+    var file: String
+    var start_sec: Double
+    var end_sec: Double
+    var duration_sec: Double
+}
+
 /// 每段 clip 的元数据，对应 PRD 第 12 节的 metadata.json 结构。
+/// segments 为该次总录音里切出的打标片段（无打标时为 nil），供后续 ASR/脚本分析。
 struct ClipMetadata: Codable {
     var id: String
     var created_at: String
@@ -14,6 +23,7 @@ struct ClipMetadata: Codable {
     var feishu_doc_url: String
     var feishu_block_id: String
     var feishu_file_token: String
+    var segments: [ClipSegment]?
 }
 
 struct ClipsIndex: Codable {
@@ -62,7 +72,17 @@ final class ClipStore {
         clipsDir.appendingPathComponent("\(id).json")
     }
 
-    func makeMetadata(id: String, startedAt: Date, duration: Double) -> ClipMetadata {
+    /// 打标片段的文件 URL：LC_xxx_M1.wav、LC_xxx_M2.wav …
+    func segmentURL(for id: String, index: Int) -> URL {
+        clipsDir.appendingPathComponent("\(id)_M\(index).wav")
+    }
+
+    func makeMetadata(
+        id: String,
+        startedAt: Date,
+        duration: Double,
+        segments: [ClipSegment]? = nil
+    ) -> ClipMetadata {
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime]
         iso.timeZone = .current
@@ -78,19 +98,31 @@ final class ClipStore {
             note: "",
             feishu_doc_url: "",
             feishu_block_id: "",
-            feishu_file_token: ""
+            feishu_file_token: "",
+            segments: segments
         )
     }
 
     /// 结构化文本锚点，粘贴到飞书后供 Codex/脚本定位这段音频。
+    /// 有打标片段时逐条列出时间区间，供后续 ASR/错因分析定位。
     func anchorText(for meta: ClipMetadata) -> String {
-        """
+        var anchor = """
         🎧 AUDIO_CLIP_ID: \(meta.id)
         duration: \(meta.duration_sec)s
         local_file: \(meta.audio_file)
         source: \(meta.source)
-        note:
         """
+        if let segments = meta.segments, !segments.isEmpty {
+            anchor += "\nmarks: \(segments.count)"
+            for seg in segments {
+                anchor += String(
+                    format: "\n  - %@ (%.1fs–%.1fs)",
+                    seg.file, seg.start_sec, seg.end_sec
+                )
+            }
+        }
+        anchor += "\nnote:"
+        return anchor
     }
 
     /// 保存单条 metadata.json 并更新 clips_index.json。

@@ -21,6 +21,12 @@ final class ClipboardService {
         pb.writeObjects([fileURL as NSURL])
     }
 
+    /// 复制多个文件（等价于 Finder 多选 Cmd+C）：总录音 + 各打标片段，一次 Cmd+V 全部粘出。
+    func copyFiles(_ fileURLs: [URL]) {
+        pb.clearContents()
+        pb.writeObjects(fileURLs as [NSURL])
+    }
+
     /// 只复制文本锚点。
     func copyAnchor(_ anchor: String) {
         pb.clearContents()
