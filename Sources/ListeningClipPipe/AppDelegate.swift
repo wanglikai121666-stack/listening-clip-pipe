@@ -147,8 +147,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             ranges.sort { $0.start < $1.start }
             marks = []
 
-            // 按绿段切割片段文件。
-            let fullURL = store.audioURL(for: id)
+            // 有打标时总录音改名为「_总录音」，粘贴到飞书后和切分段一眼可辨。
+            var fullURL = store.audioURL(for: id)
+            if !ranges.isEmpty {
+                let renamedURL = store.fullRecordingURL(for: id)
+                try FileManager.default.moveItem(at: fullURL, to: renamedURL)
+                fullURL = renamedURL
+            }
+
+            // 按绿段切割片段文件：LC_xxx_第1段切分.wav …
             var segments: [ClipSegment] = []
             for (index, range) in ranges.enumerated() {
                 let segURL = store.segmentURL(for: id, index: index + 1)
@@ -165,6 +172,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 id: id,
                 startedAt: startedAt,
                 duration: duration,
+                audioFile: fullURL.lastPathComponent,
                 segments: segments.isEmpty ? nil : segments
             )
             try store.save(meta)
@@ -234,7 +242,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func copyLastComposite() {
         guard let meta = lastMeta else { return }
         clipboard.copyComposite(
-            fileURL: store.audioURL(for: meta.id),
+            fileURL: store.fileURL(for: meta),
             anchor: store.anchorText(for: meta)
         )
         notify(title: "Clip + anchor copied", body: meta.id)
@@ -243,12 +251,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func copyLastClip() {
         guard let meta = lastMeta else { return }
         if let segments = meta.segments, !segments.isEmpty {
-            let urls = [store.audioURL(for: meta.id)]
+            let urls = [store.fileURL(for: meta)]
                 + segments.map { store.clipsDir.appendingPathComponent($0.file) }
             clipboard.copyFiles(urls)
             notify(title: "Session copied", body: "\(meta.id) + \(segments.count) 个片段")
         } else {
-            clipboard.copyAudioFile(store.audioURL(for: meta.id))
+            clipboard.copyAudioFile(store.fileURL(for: meta))
             notify(title: "Clip copied", body: meta.id)
         }
     }

@@ -56,10 +56,10 @@ open /Applications/ListeningClipPipe.app
 ```
 ~/Documents/ListeningClipPipe/
 ├── clips/
-│   ├── LC_20260626_213522.wav      # 总录音（16-bit PCM WAV）
-│   ├── LC_20260626_213522_M1.wav   # 打标片段 1
-│   ├── LC_20260626_213522_M2.wav   # 打标片段 2
-│   └── LC_20260626_213522.json     # 本次会话元数据（含各绿段时间区间）
+│   ├── LC_20260626_213522_总录音.wav     # 总录音（没打标时为 LC_xxx.wav）
+│   ├── LC_20260626_213522_第1段切分.wav  # 打标片段 1
+│   ├── LC_20260626_213522_第2段切分.wav  # 打标片段 2
+│   └── LC_20260626_213522.json          # 本次会话元数据（含各绿段时间区间）
 └── clips_index.json                # 总索引，供批量整理（如后续 ASR 分析）
 ```
 
@@ -68,11 +68,11 @@ open /Applications/ListeningClipPipe.app
 ```
 🎧 AUDIO_CLIP_ID: LC_20260626_213522
 duration: 754.2s
-local_file: LC_20260626_213522.wav
+local_file: LC_20260626_213522_总录音.wav
 source: system_audio
 marks: 2
-  - LC_20260626_213522_M1.wav (12.3s–20.1s)
-  - LC_20260626_213522_M2.wav (95.0s–101.4s)
+  - LC_20260626_213522_第1段切分.wav (12.3s–20.1s)
+  - LC_20260626_213522_第2段切分.wav (95.0s–101.4s)
 note:
 ```
 

@@ -56,10 +56,10 @@ Everything lives under `~/Documents/ListeningClipPipe/`:
 ```
 ~/Documents/ListeningClipPipe/
 ├── clips/
-│   ├── LC_20260626_213522.wav      # full session recording (16-bit PCM WAV)
-│   ├── LC_20260626_213522_M1.wav   # marked segment #1
-│   ├── LC_20260626_213522_M2.wav   # marked segment #2
-│   └── LC_20260626_213522.json     # per-session metadata (incl. mark time ranges)
+│   ├── LC_20260626_213522_总录音.wav     # full session recording (plain LC_xxx.wav when unmarked)
+│   ├── LC_20260626_213522_第1段切分.wav  # marked segment #1
+│   ├── LC_20260626_213522_第2段切分.wav  # marked segment #2
+│   └── LC_20260626_213522.json          # per-session metadata (incl. mark time ranges)
 └── clips_index.json                # global index for batch processing (e.g. future ASR)
 ```
 
@@ -68,11 +68,11 @@ Each session's text anchor (for locating the audio semantically inside your docu
 ```
 🎧 AUDIO_CLIP_ID: LC_20260626_213522
 duration: 754.2s
-local_file: LC_20260626_213522.wav
+local_file: LC_20260626_213522_总录音.wav
 source: system_audio
 marks: 2
-  - LC_20260626_213522_M1.wav (12.3s–20.1s)
-  - LC_20260626_213522_M2.wav (95.0s–101.4s)
+  - LC_20260626_213522_第1段切分.wav (12.3s–20.1s)
+  - LC_20260626_213522_第2段切分.wav (95.0s–101.4s)
 note:
 ```
 

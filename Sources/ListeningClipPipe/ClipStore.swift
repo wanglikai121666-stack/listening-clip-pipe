@@ -72,27 +72,40 @@ final class ClipStore {
         clipsDir.appendingPathComponent("\(id).json")
     }
 
-    /// 打标片段的文件 URL：LC_xxx_M1.wav、LC_xxx_M2.wav …
+    /// 打标片段文件：LC_xxx_第1段切分.wav、LC_xxx_第2段切分.wav …
     func segmentURL(for id: String, index: Int) -> URL {
-        clipsDir.appendingPathComponent("\(id)_M\(index).wav")
+        clipsDir.appendingPathComponent("\(id)_第\(index)段切分.wav")
+    }
+
+    /// 有打标时总录音改名为 LC_xxx_总录音.wav，粘贴出来一眼可辨。
+    func fullRecordingURL(for id: String) -> URL {
+        clipsDir.appendingPathComponent("\(id)_总录音.wav")
+    }
+
+    /// 按元数据里记录的实际文件名取 URL（总录音可能带「_总录音」后缀）。
+    func fileURL(for meta: ClipMetadata) -> URL {
+        clipsDir.appendingPathComponent(meta.audio_file)
     }
 
     func makeMetadata(
         id: String,
         startedAt: Date,
         duration: Double,
+        audioFile: String? = nil,
         segments: [ClipSegment]? = nil
     ) -> ClipMetadata {
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime]
         iso.timeZone = .current
+        let fileName = audioFile ?? "\(id).wav"
+        let filePath = clipsDir.appendingPathComponent(fileName).path
         return ClipMetadata(
             id: id,
             created_at: iso.string(from: startedAt),
             duration_sec: (duration * 10).rounded() / 10,
             source: "system_audio",
-            audio_file: "\(id).wav",
-            local_path: (audioURL(for: id).path as NSString).abbreviatingWithTildeInPath,
+            audio_file: fileName,
+            local_path: (filePath as NSString).abbreviatingWithTildeInPath,
             paste_anchor: "🎧 AUDIO_CLIP_ID: \(id)",
             tags: [],
             note: "",
