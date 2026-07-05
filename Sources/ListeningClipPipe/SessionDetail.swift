@@ -136,6 +136,7 @@ final class SessionDetailModel: ObservableObject {
 
 struct SessionDetailView: View {
     @StateObject private var model: SessionDetailModel
+    @Environment(\.dismiss) private var dismiss
 
     init(meta: ClipMetadata, store: ClipStore) {
         _model = StateObject(wrappedValue: SessionDetailModel(meta: meta, store: store))
@@ -147,6 +148,23 @@ struct SessionDetailView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            // 返回主界面
+            HStack {
+                Button {
+                    model.stopPlayback()
+                    dismiss()
+                } label: {
+                    Label("返回列表", systemImage: "chevron.left")
+                }
+                .keyboardShortcut(.escape, modifiers: [])
+                if model.dirty {
+                    Text("（有未保存的绿标修改）")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+                Spacer()
+            }
+
             // 播放控制
             HStack(spacing: 12) {
                 Button {
