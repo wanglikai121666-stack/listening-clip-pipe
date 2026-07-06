@@ -91,7 +91,7 @@ If your target app doesn't paste what you expect, use the **Copy Last Clip** / *
 
 ## Scope & roadmap
 
-The current version (v1.4.x) does capture, marking, slicing, local storage, clipboard, and on-demand ASR analysis reports (SiliconFlow SenseVoiceSmall — bring your own API key, set it in the Library window). Not included (yet): Feishu API sync (interface stubbed in `FeishuSyncService.swift`; reports are designed to be uploaded by an external CLI), replay/review UI, spaced-repetition scheduling, Anki export. The structured local data (mark time ranges in per-session metadata + global index) means all of these can be built on top without touching the capture pipeline.
+The current version (v1.5.x) does capture, marking, slicing, local storage, clipboard, a built-in player with visual mark editing, and on-demand ASR analysis reports (SiliconFlow SenseVoiceSmall — bring your own API key, set it in the Library window). Not included (yet): Feishu API sync (interface stubbed in `FeishuSyncService.swift`; reports are designed to be uploaded by an external CLI), replay/review UI, spaced-repetition scheduling, Anki export. The structured local data (mark time ranges in per-session metadata + global index) means all of these can be built on top without touching the capture pipeline.
 
 ## Troubleshooting
 
